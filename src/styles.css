@@ -392,6 +392,40 @@ body {
   height: 68px;
 }
 
+/* SVG card face */
+.card-face {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.card-index-rank {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 19px;
+}
+
+.card-index-suit {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+}
+
+.card-pip {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 25px;
+}
+
+.card-face-suit {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 30px;
+}
+
+.card-face-letter {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 34px;
+}
+
 .card-red {
   color: var(--red);
 }
