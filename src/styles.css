@@ -186,6 +186,20 @@ body {
 }
 
 /* ============================================================
+   Discard hint
+   ============================================================ */
+.discard-hint {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #cfe3ff;
+  background: rgba(90,170,255,0.12);
+  border: 1px solid rgba(90,170,255,0.35);
+  border-radius: 6px;
+  padding: 5px 12px;
+  display: inline-block;
+}
+
+/* ============================================================
    Action buttons
    ============================================================ */
 .action-buttons {
@@ -282,6 +296,13 @@ body {
   transform: translateY(-10px) !important;
   box-shadow: 0 8px 20px rgba(255,215,0,0.7) !important;
   border-color: var(--gold) !important;
+}
+
+/* Marked-for-planning cards: a softer lift + ring than the active selection. */
+.card-marked {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 4px 12px rgba(90,170,255,0.55);
+  border-color: #5aa9ff;
 }
 
 .card-small {

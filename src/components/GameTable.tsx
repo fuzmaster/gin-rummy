@@ -14,7 +14,7 @@ type Props = {
 };
 
 export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectCard, onDiscard, onKnock }: Props) {
-  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, statusMessage } = state;
+  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, markedCards, statusMessage } = state;
 
   const playerMelds = useMemo(() => meldGroups(playerHand), [playerHand]);
   const playerDW = useMemo(() => bestDeadwood(playerHand).deadwood, [playerHand]);
@@ -83,10 +83,16 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
         <HandView
           cards={playerHand}
           selectedId={selectedCard}
+          markedIds={markedCards}
           onSelect={phase === "awaiting-discard" ? onSelectCard : undefined}
           label="Player hand"
           meldMap={playerMelds}
         />
+        {phase === "awaiting-discard" && markedCards.length > 1 && selectedCard && (
+          <div className="discard-hint">
+            {markedCards.length} cards marked · Discard removes <strong>{selectedCard}</strong> (the lifted card)
+          </div>
+        )}
         <div className="action-buttons">
           <button className="btn" disabled={!canDraw} onClick={onDrawStock}>Draw Stock</button>
           <button className="btn" disabled={!canDraw || !topDiscard} onClick={onDrawDiscard}>Draw Discard</button>

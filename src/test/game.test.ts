@@ -3,6 +3,7 @@ import { buildDeck, cardValue, makeCard } from '../game/cards';
 import { isSet, isRun, bestDeadwood, deadwoodValue, applyLayoffs } from '../game/melds';
 import { calculateScore } from '../game/scoring';
 import { cpuChooseDiscard } from '../game/cpu';
+import { createInitialState, playerDrawStock, playerSelectCard } from '../game/engine';
 import type { Card } from '../game/types';
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -245,6 +246,32 @@ describe('calculateScore — lay-offs', () => {
     expect(result.cpuDeadwood).toBe(6);
     expect(result.playerDeadwood).toBe(3); // A♥ + 2♦ after 7♦ lays off
     expect(result.points).toBe(28); // 25 + (6 - 3)
+  });
+});
+
+// ── Multi-select / marking ────────────────────────────────────
+describe('playerSelectCard — multi-mark', () => {
+  it('marks multiple cards, keeping the most recent as the active selection', () => {
+    let s = playerDrawStock(createInitialState()); // → awaiting-discard
+    const [a, b] = s.playerHand;
+
+    s = playerSelectCard(s, a.id);
+    expect(s.markedCards).toEqual([a.id]);
+    expect(s.selectedCard).toBe(a.id);
+
+    s = playerSelectCard(s, b.id);
+    expect(s.markedCards).toEqual([a.id, b.id]);
+    expect(s.selectedCard).toBe(b.id);
+
+    // Toggling the active card off falls back to the previous mark.
+    s = playerSelectCard(s, b.id);
+    expect(s.markedCards).toEqual([a.id]);
+    expect(s.selectedCard).toBe(a.id);
+
+    // Toggling the last mark off clears the active selection.
+    s = playerSelectCard(s, a.id);
+    expect(s.markedCards).toEqual([]);
+    expect(s.selectedCard).toBeNull();
   });
 });
 

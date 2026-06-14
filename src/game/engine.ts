@@ -23,6 +23,7 @@ function drawnRound(state: GameState): GameState {
     ...state,
     phase: "round-over",
     selectedCard: null,
+    markedCards: [],
     roundResult: {
       winner: null,
       type: "draw",
@@ -46,6 +47,7 @@ export function createInitialState(
     playerHand: [],
     cpuHand: [],
     selectedCard: null,
+    markedCards: [],
     playerScore: 0,
     cpuScore: 0,
     round: 0,
@@ -72,6 +74,7 @@ export function newRound(state: GameState): GameState {
     playerHand,
     cpuHand,
     selectedCard: null,
+    markedCards: [],
     roundResult: null,
     drewFromDiscard: false,
     round: state.round + 1,
@@ -91,6 +94,8 @@ export function playerDrawStock(state: GameState): GameState {
     discardPile,
     playerHand: sortHand([...state.playerHand, drawn]),
     phase: "awaiting-discard",
+    selectedCard: null,
+    markedCards: [],
     drewFromDiscard: false,
     statusMessage: `You drew ${drawn.id} from stock. Select a card to discard.`,
   };
@@ -106,13 +111,30 @@ export function playerDrawDiscard(state: GameState): GameState {
     discardPile: newDiscardPile,
     playerHand: sortHand([...state.playerHand, drawn]),
     phase: "awaiting-discard",
+    selectedCard: null,
+    markedCards: [],
     drewFromDiscard: true,
     statusMessage: `You drew ${drawn.id} from discard. Select a card to discard.`,
   };
 }
 
+/**
+ * Toggle a card's "marked" highlight during the discard phase. Multiple cards
+ * can be marked for planning; the most recently marked card becomes the active
+ * selection that Discard/Knock will act on.
+ */
 export function playerSelectCard(state: GameState, cardId: string): GameState {
-  return { ...state, selectedCard: cardId };
+  if (state.phase !== "awaiting-discard") return state;
+  if (state.markedCards.includes(cardId)) {
+    const markedCards = state.markedCards.filter(id => id !== cardId);
+    const selectedCard = markedCards.length ? markedCards[markedCards.length - 1] : null;
+    return { ...state, markedCards, selectedCard };
+  }
+  return {
+    ...state,
+    markedCards: [...state.markedCards, cardId],
+    selectedCard: cardId,
+  };
 }
 
 export function playerDiscard(state: GameState): GameState {
@@ -129,6 +151,7 @@ export function playerDiscard(state: GameState): GameState {
     playerHand: newHand,
     discardPile: [...state.discardPile, card],
     selectedCard: null,
+    markedCards: [],
     phase: "cpu-turn",
     drewFromDiscard: false,
     statusMessage: `You discarded ${card.id}. CPU is thinking…`,
@@ -153,6 +176,7 @@ export function playerKnock(state: GameState): GameState {
     playerHand: newHand,
     discardPile: [...state.discardPile, card],
     selectedCard: null,
+    markedCards: [],
     phase,
     playerScore: newPlayerScore,
     cpuScore: newCpuScore,

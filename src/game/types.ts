@@ -31,7 +31,8 @@ export type GameState = {
   discardPile: Card[];
   playerHand: Card[];
   cpuHand: Card[];
-  selectedCard: string | null;   // card id
+  selectedCard: string | null;   // active card id — the one Discard/Knock acts on
+  markedCards: string[];         // cards highlighted for planning (includes selectedCard)
   playerScore: number;
   cpuScore: number;
   round: number;
