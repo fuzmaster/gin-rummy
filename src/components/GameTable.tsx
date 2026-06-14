@@ -79,7 +79,13 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
 
       {/* Player area */}
       <section className="player-area" aria-label="Player hand">
-        <div className="area-label">Your hand — deadwood: {playerDW}</div>
+        <div className="area-header">
+          <span className="area-label">Your hand</span>
+          <span className={`deadwood-chip${playerDW <= 10 ? " deadwood-chip-low" : ""}`}>
+            Deadwood <strong>{playerDW}</strong>
+            {playerDW === 0 ? " · Gin!" : playerDW <= 10 ? " · can knock" : ""}
+          </span>
+        </div>
         <HandView
           cards={playerHand}
           selectedId={selectedCard}
@@ -94,10 +100,14 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           </div>
         )}
         <div className="action-buttons">
-          <button className="btn" disabled={!canDraw} onClick={onDrawStock}>Draw Stock</button>
-          <button className="btn" disabled={!canDraw || !topDiscard} onClick={onDrawDiscard}>Draw Discard</button>
+          <button className="btn" disabled={!canDraw} onClick={onDrawStock}>🂠 Draw Stock</button>
+          <button className="btn" disabled={!canDraw || !topDiscard} onClick={onDrawDiscard}>♻ Draw Discard</button>
           <button className="btn btn-primary" disabled={!canDiscard} onClick={onDiscard}>Discard</button>
-          <button className="btn btn-knock" disabled={!canKnock} onClick={onKnock}>
+          <button
+            className={`btn btn-knock${canKnock ? " btn-knock-ready" : ""}`}
+            disabled={!canKnock}
+            onClick={onKnock}
+          >
             {isGin ? "Gin! 🎉" : "Knock"}
           </button>
         </div>
