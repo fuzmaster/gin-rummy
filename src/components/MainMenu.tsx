@@ -1,14 +1,22 @@
+import type { Difficulty } from "../game/types";
 import type { Stats } from "../storage";
 
 type Props = {
   stats: Stats;
   targetScore: number;
+  difficulty: Difficulty;
   onPlay: () => void;
   onHowTo: () => void;
   onSettings: () => void;
 };
 
-export default function MainMenu({ stats, targetScore, onPlay, onHowTo, onSettings }: Props) {
+const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
+export default function MainMenu({ stats, targetScore, difficulty, onPlay, onHowTo, onSettings }: Props) {
   const winRate =
     stats.gamesPlayed > 0 ? Math.round((stats.wins / stats.gamesPlayed) * 100) : 0;
 
@@ -16,7 +24,7 @@ export default function MainMenu({ stats, targetScore, onPlay, onHowTo, onSettin
     <div className="menu-screen">
       <div className="menu-card">
         <h1 className="menu-title">🃏 Gin Rummy</h1>
-        <p className="menu-subtitle">First to {targetScore} points wins.</p>
+        <p className="menu-subtitle">First to {targetScore} · {DIFFICULTY_LABELS[difficulty]} CPU</p>
 
         <div className="menu-buttons">
           <button className="btn btn-primary menu-main-btn" onClick={onPlay}>

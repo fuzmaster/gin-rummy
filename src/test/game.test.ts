@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildDeck, cardValue, makeCard } from '../game/cards';
-import { isSet, isRun, bestDeadwood, deadwoodValue } from '../game/melds';
+import { isSet, isRun, bestDeadwood, deadwoodValue, applyLayoffs } from '../game/melds';
 import { calculateScore } from '../game/scoring';
 import { cpuChooseDiscard } from '../game/cpu';
 import type { Card } from '../game/types';
@@ -186,6 +186,65 @@ describe('calculateScore — undercut', () => {
     expect(result.type).toBe('undercut');
     expect(result.winner).toBe('player');
     expect(result.points).toBe(25 + (result.cpuDeadwood - result.playerDeadwood));
+  });
+});
+
+// ── Lay-offs ──────────────────────────────────────────────────
+describe('applyLayoffs', () => {
+  it('extends a run at both ends and leaves the rest as deadwood', () => {
+    const melds = [[card('5', 'H'), card('6', 'H'), card('7', 'H')]];
+    const deadwood = [card('8', 'H'), card('4', 'H'), card('K', 'C')];
+    const remaining = applyLayoffs(deadwood, melds);
+    expect(remaining.map(c => c.id)).toEqual(['KC']);
+  });
+
+  it('completes a set but never beyond four cards', () => {
+    const melds = [[card('7', 'S'), card('7', 'H'), card('7', 'D')]];
+    const remaining = applyLayoffs([card('7', 'C')], melds);
+    expect(remaining).toHaveLength(0);
+  });
+});
+
+describe('calculateScore — lay-offs', () => {
+  it('defender lays off deadwood onto the knocker melds, lowering the points', () => {
+    const playerHand: Card[] = [
+      card('A', 'S'), card('2', 'S'), card('3', 'S'),   // run
+      card('5', 'H'), card('6', 'H'), card('7', 'H'),   // run
+      card('9', 'D'), card('10', 'D'), card('J', 'D'),  // run
+      card('5', 'C'),                                    // 5 deadwood
+    ];
+    const cpuHand: Card[] = [
+      card('2', 'C'), card('3', 'C'), card('4', 'C'),   // run
+      card('6', 'S'), card('7', 'S'), card('8', 'S'),   // run
+      card('8', 'H'), card('4', 'H'),                    // both lay off onto 5-6-7 hearts
+      card('K', 'C'), card('Q', 'C'),                    // 20 deadwood, no lay-off
+    ];
+    const result = calculateScore('player', playerHand, cpuHand);
+    expect(result.type).toBe('knock');
+    expect(result.winner).toBe('player');
+    expect(result.cpuDeadwood).toBe(20); // 8H + 4H laid off; K + Q remain
+    expect(result.points).toBe(15);      // 20 - 5
+  });
+
+  it('a lay-off can turn a knock into an undercut', () => {
+    const cpuHand: Card[] = [
+      card('A', 'S'), card('2', 'S'), card('3', 'S'),
+      card('4', 'H'), card('5', 'H'), card('6', 'H'),
+      card('8', 'D'), card('9', 'D'), card('10', 'D'),
+      card('6', 'C'),                                    // knocker deadwood 6
+    ];
+    const playerHand: Card[] = [
+      card('K', 'S'), card('K', 'H'), card('K', 'D'),   // set
+      card('A', 'C'), card('2', 'C'), card('3', 'C'), card('4', 'C'), // run of 4
+      card('7', 'D'),                                    // lays off onto 8-9-10 diamonds
+      card('A', 'H'), card('2', 'D'),                    // 3 deadwood remains
+    ];
+    const result = calculateScore('cpu', playerHand, cpuHand);
+    expect(result.type).toBe('undercut');
+    expect(result.winner).toBe('player');
+    expect(result.cpuDeadwood).toBe(6);
+    expect(result.playerDeadwood).toBe(3); // A♥ + 2♦ after 7♦ lays off
+    expect(result.points).toBe(28); // 25 + (6 - 3)
   });
 });
 

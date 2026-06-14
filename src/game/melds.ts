@@ -112,6 +112,44 @@ export function bestDeadwood(hand: Card[]): {
   return best;
 }
 
+/** Can `card` be laid off onto an existing meld (complete a set or extend a run)? */
+function canAttachToMeld(meld: Card[], card: Card): boolean {
+  if (isSet(meld)) {
+    return meld.length < 4 && card.rank === meld[0].rank;
+  }
+  if (isRun(meld)) {
+    if (card.suit !== meld[0].suit) return false;
+    const ranks = meld.map(c => RANK_ORDER[c.rank]);
+    const r = RANK_ORDER[card.rank];
+    return r === Math.min(...ranks) - 1 || r === Math.max(...ranks) + 1;
+  }
+  return false;
+}
+
+/**
+ * Lay off deadwood onto the opponent's melds (gin rummy knock rules): the
+ * defender may attach cards to the knocker's melds before scoring. Returns the
+ * cards that remain as deadwood after laying off everything possible.
+ */
+export function applyLayoffs(deadwoodCards: Card[], opponentMelds: Meld[]): Card[] {
+  const pool = [...deadwoodCards];
+  const melds = opponentMelds.map(m => [...m]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i < pool.length; i++) {
+      const target = melds.find(m => canAttachToMeld(m, pool[i]));
+      if (target) {
+        target.push(pool[i]);
+        pool.splice(i, 1);
+        changed = true;
+        break;
+      }
+    }
+  }
+  return pool;
+}
+
 /**
  * Map each card id to the index of the meld it belongs to in the best
  * arrangement. Deadwood cards are absent from the map. Used to colour-code

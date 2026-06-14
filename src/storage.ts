@@ -4,8 +4,11 @@
    unavailable (private mode, disabled cookies, SSR, etc.).
    ============================================================ */
 
+import type { Difficulty } from "./game/types";
+
 export type Settings = {
   targetScore: number;
+  difficulty: Difficulty;
 };
 
 export type Stats = {
@@ -16,11 +19,12 @@ export type Stats = {
 };
 
 export const TARGET_SCORES = [50, 100, 250] as const;
+export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 const SETTINGS_KEY = "gin-rummy-settings";
 const STATS_KEY = "gin-rummy-stats";
 
-const DEFAULT_SETTINGS: Settings = { targetScore: 100 };
+const DEFAULT_SETTINGS: Settings = { targetScore: 100, difficulty: "medium" };
 const DEFAULT_STATS: Stats = { wins: 0, losses: 0, gamesPlayed: 0, totalPoints: 0 };
 
 export function loadSettings(): Settings {
@@ -29,10 +33,15 @@ export function loadSettings(): Settings {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Settings>;
       const target = Number(parsed.targetScore);
+      const difficulty = parsed.difficulty;
       return {
         targetScore: (TARGET_SCORES as readonly number[]).includes(target)
           ? target
           : DEFAULT_SETTINGS.targetScore,
+        difficulty:
+          difficulty && DIFFICULTIES.includes(difficulty)
+            ? difficulty
+            : DEFAULT_SETTINGS.difficulty,
       };
     }
   } catch {

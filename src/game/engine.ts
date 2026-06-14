@@ -1,10 +1,11 @@
-import type { GameState, Card } from "./types";
+import type { GameState, Card, Difficulty } from "./types";
 import { buildDeck, shuffle, sortHand } from "./cards";
 import { bestDeadwood } from "./melds";
 import { calculateScore } from "./scoring";
-import { cpuTakeTurn } from "./cpu";
+import { cpuTakeTurn, CPU_CONFIGS } from "./cpu";
 
 export const DEFAULT_TARGET_SCORE = 100;
+export const DEFAULT_DIFFICULTY: Difficulty = "medium";
 
 let gameCounter = 0;
 
@@ -34,7 +35,10 @@ function drawnRound(state: GameState): GameState {
   };
 }
 
-export function createInitialState(targetScore: number = DEFAULT_TARGET_SCORE): GameState {
+export function createInitialState(
+  targetScore: number = DEFAULT_TARGET_SCORE,
+  cpuDifficulty: Difficulty = DEFAULT_DIFFICULTY
+): GameState {
   return newRound({
     phase: "awaiting-draw",
     stock: [],
@@ -50,6 +54,7 @@ export function createInitialState(targetScore: number = DEFAULT_TARGET_SCORE): 
     drewFromDiscard: false,
     targetScore,
     gameId: ++gameCounter,
+    cpuDifficulty,
   });
 }
 
@@ -165,7 +170,7 @@ export function runCpuTurn(state: GameState): GameState {
   }
 
   const { newHand, newStock, newDiscardPile, knocked, discardedCard, drewFrom } =
-    cpuTakeTurn(state.cpuHand, state.stock, state.discardPile);
+    cpuTakeTurn(state.cpuHand, state.stock, state.discardPile, CPU_CONFIGS[state.cpuDifficulty]);
 
   const drewMsg = drewFrom === "discard" ? "discard" : "stock";
 

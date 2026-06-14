@@ -372,6 +372,7 @@ body {
   justify-content: center;
   z-index: 100;
   padding: 20px;
+  animation: overlay-fade 0.2s ease;
 }
 
 .modal {
@@ -383,6 +384,7 @@ body {
   width: 100%;
   box-shadow: 0 8px 40px rgba(0,0,0,0.8);
   color: #e8e8e8;
+  animation: modal-pop 0.25s cubic-bezier(0.2, 0.8, 0.3, 1.1);
 }
 
 .modal-title {
@@ -618,6 +620,10 @@ body {
   font-weight: 700;
 }
 
+.settings-option-value-sm {
+  font-size: 1rem;
+}
+
 .settings-option-sub {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -650,6 +656,55 @@ body {
   font-size: 0.8rem;
   font-weight: 400;
   color: #bdbdbd;
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(12px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes menu-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards animate in as they're dealt / drawn. */
+.hand-view .card,
+.center-area .card {
+  animation: card-enter 0.22s ease both;
+}
+
+/* The selected-card lift takes over once a card is in hand. */
+.card-selected {
+  animation: none;
+}
+
+.menu-card {
+  animation: menu-rise 0.25s ease both;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 /* ============================================================

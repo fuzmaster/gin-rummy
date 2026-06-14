@@ -1,6 +1,22 @@
-import type { Card } from "./types";
+import type { Card, Difficulty } from "./types";
 import { bestDeadwood } from "./melds";
-import { sortHand } from "./cards";
+import { sortHand, shuffle } from "./cards";
+
+export type CpuConfig = {
+  knockThreshold: number;       // only knock when deadwood <= this
+  knockChance: number;          // probability of knocking when eligible
+  randomDiscardChance: number;  // chance to discard a random card instead of the optimal one
+  useDiscardPile: boolean;      // whether the CPU considers drawing from the discard pile
+};
+
+export const CPU_CONFIGS: Record<Difficulty, CpuConfig> = {
+  // Easy: ignores the discard pile, plays loose, and sometimes forgets to knock.
+  easy:   { knockThreshold: 10, knockChance: 0.6, randomDiscardChance: 0.5, useDiscardPile: false },
+  // Medium: solid greedy play, always knocks when it legally can.
+  medium: { knockThreshold: 10, knockChance: 1.0, randomDiscardChance: 0.15, useDiscardPile: true },
+  // Hard: optimal discards and holds out for low-deadwood knocks to dodge undercuts.
+  hard:   { knockThreshold: 7,  knockChance: 1.0, randomDiscardChance: 0.0, useDiscardPile: true },
+};
 
 /**
  * CPU decides whether to take the top discard card.
@@ -19,17 +35,23 @@ export function cpuShouldTakeDiscard(hand: Card[], topDiscard: Card): boolean {
 }
 
 /**
- * CPU picks the best card to discard from its current 11-card hand.
- * Returns the card that, when removed, leaves the lowest deadwood.
- * Also returns the drawn card reference if it came from discard (to avoid re-discarding it).
+ * CPU picks a card to discard from its current 11-card hand. With probability
+ * `randomChance` it makes a weak (random deadwood) discard; otherwise it picks
+ * the card that leaves the lowest deadwood.
+ * `drewCard`, if given, is the card just drawn from discard and cannot be re-discarded.
  */
-export function cpuChooseDiscard(hand: Card[], drewCard?: Card): Card {
-  let bestCard = hand[0];
-  let bestDW = Infinity;
+export function cpuChooseDiscard(hand: Card[], drewCard?: Card, randomChance = 0): Card {
+  const candidates = hand.filter(c => !(drewCard && c.id === drewCard.id));
 
-  for (const card of hand) {
-    // Don't discard the card just drawn from discard pile
-    if (drewCard && card.id === drewCard.id) continue;
+  if (randomChance > 0 && Math.random() < randomChance) {
+    const deadwood = bestDeadwood(hand).deadwoodCards.filter(c => !(drewCard && c.id === drewCard.id));
+    const pool = deadwood.length > 0 ? deadwood : candidates;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  let bestCard = candidates[0];
+  let bestDW = Infinity;
+  for (const card of candidates) {
     const trial = hand.filter(c => c.id !== card.id);
     const dw = bestDeadwood(trial).deadwood;
     if (dw < bestDW) {
@@ -41,13 +63,14 @@ export function cpuChooseDiscard(hand: Card[], drewCard?: Card): Card {
 }
 
 /**
- * CPU full turn: draw + discard decision.
+ * CPU full turn: draw + discard decision, parameterised by difficulty config.
  * Returns updated hand, discard, stock, and whether CPU knocked.
  */
 export function cpuTakeTurn(
   hand: Card[],
   stock: Card[],
-  discardPile: Card[]
+  discardPile: Card[],
+  config: CpuConfig = CPU_CONFIGS.medium
 ): {
   newHand: Card[];
   newStock: Card[];
@@ -63,7 +86,7 @@ export function cpuTakeTurn(
 
   const topDiscard = newDiscardPile[newDiscardPile.length - 1];
 
-  if (topDiscard && cpuShouldTakeDiscard(hand, topDiscard)) {
+  if (config.useDiscardPile && topDiscard && cpuShouldTakeDiscard(hand, topDiscard)) {
     // Take from discard
     newDiscardPile = newDiscardPile.slice(0, -1);
     drewCard = topDiscard;
@@ -74,7 +97,7 @@ export function cpuTakeTurn(
       // Reshuffle discard except top card
       const top = newDiscardPile[newDiscardPile.length - 1];
       const rest = newDiscardPile.slice(0, -1);
-      newStock = rest.sort(() => Math.random() - 0.5);
+      newStock = shuffle(rest);
       newDiscardPile = [top];
     }
     drewCard = newStock[newStock.length - 1];
@@ -82,12 +105,16 @@ export function cpuTakeTurn(
   }
 
   const handWith = [...hand, drewCard];
-  const discard = cpuChooseDiscard(handWith, drewFrom === "discard" ? drewCard : undefined);
+  const discard = cpuChooseDiscard(
+    handWith,
+    drewFrom === "discard" ? drewCard : undefined,
+    config.randomDiscardChance
+  );
   const newHand = sortHand(handWith.filter(c => c.id !== discard.id));
   newDiscardPile = [...newDiscardPile, discard];
 
   const dw = bestDeadwood(newHand).deadwood;
-  const knocked = dw <= 10;
+  const knocked = dw <= config.knockThreshold && Math.random() < config.knockChance;
 
   return { newHand, newStock, newDiscardPile, knocked, discardedCard: discard, drewFrom };
 }

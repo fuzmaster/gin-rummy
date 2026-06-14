@@ -1,8 +1,11 @@
-import { TARGET_SCORES } from "../storage";
+import type { Difficulty } from "../game/types";
+import { TARGET_SCORES, DIFFICULTIES } from "../storage";
 
 type Props = {
   targetScore: number;
+  difficulty: Difficulty;
   onTargetChange: (score: number) => void;
+  onDifficultyChange: (difficulty: Difficulty) => void;
   onResetStats: () => void;
   onBack: () => void;
 };
@@ -13,7 +16,20 @@ const TARGET_LABELS: Record<number, string> = {
   250: "Long",
 };
 
-export default function Settings({ targetScore, onTargetChange, onResetStats, onBack }: Props) {
+const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
+export default function Settings({
+  targetScore,
+  difficulty,
+  onTargetChange,
+  onDifficultyChange,
+  onResetStats,
+  onBack,
+}: Props) {
   return (
     <div className="menu-screen">
       <div className="menu-card">
@@ -31,6 +47,25 @@ export default function Settings({ targetScore, onTargetChange, onResetStats, on
               >
                 <span className="settings-option-value">{score}</span>
                 <span className="settings-option-sub">{TARGET_LABELS[score]}</span>
+              </button>
+            ))}
+          </div>
+          <p className="settings-hint">Applies to your next game.</p>
+        </div>
+
+        <div className="settings-group">
+          <div className="settings-label">CPU difficulty</div>
+          <div className="settings-options">
+            {DIFFICULTIES.map((level) => (
+              <button
+                key={level}
+                className={`btn settings-option${level === difficulty ? " settings-option-active" : ""}`}
+                onClick={() => onDifficultyChange(level)}
+                aria-pressed={level === difficulty}
+              >
+                <span className="settings-option-value settings-option-value-sm">
+                  {DIFFICULTY_LABELS[level]}
+                </span>
               </button>
             ))}
           </div>

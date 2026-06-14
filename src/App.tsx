@@ -16,7 +16,7 @@ import {
   playerKnock,
   runCpuTurn,
 } from './game/engine';
-import type { GameState } from './game/types';
+import type { GameState, Difficulty } from './game/types';
 import {
   loadSettings,
   saveSettings,
@@ -34,7 +34,7 @@ type Action =
   | { type: 'KNOCK' }
   | { type: 'CPU_TURN' }
   | { type: 'NEW_ROUND' }
-  | { type: 'NEW_GAME'; targetScore: number };
+  | { type: 'NEW_GAME'; targetScore: number; difficulty: Difficulty };
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -45,7 +45,7 @@ function reducer(state: GameState, action: Action): GameState {
     case 'KNOCK':         return playerKnock(state);
     case 'CPU_TURN':      return runCpuTurn(state);
     case 'NEW_ROUND':     return newRound(state);
-    case 'NEW_GAME':      return createInitialState(action.targetScore);
+    case 'NEW_GAME':      return createInitialState(action.targetScore, action.difficulty);
     default:              return state;
   }
 }
@@ -81,18 +81,27 @@ export default function App() {
   }, [state.phase, state.gameId, state.playerScore, state.targetScore]);
 
   const startGame = useCallback(() => {
-    dispatch({ type: 'NEW_GAME', targetScore: settings.targetScore });
+    dispatch({ type: 'NEW_GAME', targetScore: settings.targetScore, difficulty: settings.difficulty });
     setScreen('game');
-  }, [settings.targetScore]);
+  }, [settings.targetScore, settings.difficulty]);
 
   const handleNewRound = useCallback(() => {
-    if (state.phase === 'game-over') dispatch({ type: 'NEW_GAME', targetScore: settings.targetScore });
+    if (state.phase === 'game-over')
+      dispatch({ type: 'NEW_GAME', targetScore: settings.targetScore, difficulty: settings.difficulty });
     else dispatch({ type: 'NEW_ROUND' });
-  }, [state.phase, settings.targetScore]);
+  }, [state.phase, settings.targetScore, settings.difficulty]);
 
   const handleTargetChange = useCallback((targetScore: number) => {
     setSettings(prev => {
       const next = { ...prev, targetScore };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
+  const handleDifficultyChange = useCallback((difficulty: Difficulty) => {
+    setSettings(prev => {
+      const next = { ...prev, difficulty };
       saveSettings(next);
       return next;
     });
@@ -109,6 +118,7 @@ export default function App() {
       <MainMenu
         stats={stats}
         targetScore={settings.targetScore}
+        difficulty={settings.difficulty}
         onPlay={startGame}
         onHowTo={() => setScreen('how-to-play')}
         onSettings={() => setScreen('settings')}
@@ -124,7 +134,9 @@ export default function App() {
     return (
       <Settings
         targetScore={settings.targetScore}
+        difficulty={settings.difficulty}
         onTargetChange={handleTargetChange}
+        onDifficultyChange={handleDifficultyChange}
         onResetStats={handleResetStats}
         onBack={() => setScreen('menu')}
       />

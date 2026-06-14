@@ -14,6 +14,8 @@ export type Phase =
   | "round-over"
   | "game-over";
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 export type RoundResult = {
   winner: "player" | "cpu" | null;   // null = drawn round (no points)
   type: "gin" | "knock" | "undercut" | "draw";
@@ -36,6 +38,7 @@ export type GameState = {
   statusMessage: string;
   roundResult: RoundResult | null;
   drewFromDiscard: boolean;
-  targetScore: number;   // points needed to win the game
-  gameId: number;        // unique per game, used to record stats once
+  targetScore: number;        // points needed to win the game
+  gameId: number;             // unique per game, used to record stats once
+  cpuDifficulty: Difficulty;  // CPU skill level for this game
 };
