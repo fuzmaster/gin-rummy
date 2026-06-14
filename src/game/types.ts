@@ -15,12 +15,12 @@ export type Phase =
   | "game-over";
 
 export type RoundResult = {
-  winner: "player" | "cpu";
-  type: "gin" | "knock" | "undercut";
+  winner: "player" | "cpu" | null;   // null = drawn round (no points)
+  type: "gin" | "knock" | "undercut" | "draw";
   playerDeadwood: number;
   cpuDeadwood: number;
   points: number;
-  knocker: "player" | "cpu";
+  knocker: "player" | "cpu" | null;
 };
 
 export type GameState = {

@@ -6,12 +6,15 @@ type Props = {
   selected?: boolean;
   onClick?: () => void;
   small?: boolean;
+  /** Index of the meld this card belongs to, or undefined if it's deadwood. */
+  meldGroup?: number;
 };
 
 const SUIT_SYMBOL: Record<string, string> = { S: "♠", H: "♥", D: "♦", C: "♣" };
 const RED_SUITS = new Set(["H", "D"]);
+const MELD_COLORS = 4;
 
-export default function CardView({ card, faceDown = false, selected = false, onClick, small = false }: Props) {
+export default function CardView({ card, faceDown = false, selected = false, onClick, small = false, meldGroup }: Props) {
   if (faceDown) {
     return (
       <div className={`card card-back${small ? " card-small" : ""}`} aria-label="face-down card" />
@@ -20,9 +23,10 @@ export default function CardView({ card, faceDown = false, selected = false, onC
 
   const symbol = SUIT_SYMBOL[card.suit];
   const isRed = RED_SUITS.has(card.suit);
+  const meldClass = meldGroup !== undefined ? ` card-meld card-meld-${meldGroup % MELD_COLORS}` : "";
   return (
     <div
-      className={`card${isRed ? " card-red" : " card-black"}${selected ? " card-selected" : ""}${small ? " card-small" : ""}`}
+      className={`card${isRed ? " card-red" : " card-black"}${selected ? " card-selected" : ""}${small ? " card-small" : ""}${meldClass}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}

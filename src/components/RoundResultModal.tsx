@@ -1,7 +1,10 @@
-import type { RoundResult } from "../game/types";
+import type { Card, RoundResult } from "../game/types";
+import { meldGroups } from "../game/melds";
+import HandView from "./HandView";
 
 type Props = {
   result: RoundResult;
+  cpuHand: Card[];
   playerScore: number;
   cpuScore: number;
   isGameOver: boolean;
@@ -12,21 +15,29 @@ const TYPE_LABEL: Record<string, string> = {
   gin: "Gin!",
   knock: "Knock",
   undercut: "Undercut!",
+  draw: "Draw",
 };
 
-export default function RoundResultModal({ result, playerScore, cpuScore, isGameOver, onNext }: Props) {
-  const winnerLabel = result.winner === "player" ? "You win" : "CPU wins";
+export default function RoundResultModal({ result, cpuHand, playerScore, cpuScore, isGameOver, onNext }: Props) {
+  const winnerLabel =
+    result.winner === "player" ? "You win" : result.winner === "cpu" ? "CPU wins" : "No winner";
+  const cpuMelds = meldGroups(cpuHand);
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Round result">
       <div className="modal">
         <h2 className="modal-title">{isGameOver ? "🏆 Game Over" : "Round Over"}</h2>
         <p className="modal-result-type">{TYPE_LABEL[result.type]} — {winnerLabel} this round!</p>
 
+        <div className="modal-cpu-reveal">
+          <div className="modal-cpu-label">CPU's hand</div>
+          <HandView cards={cpuHand} small meldMap={cpuMelds} label="CPU revealed hand" />
+        </div>
+
         <table className="modal-table">
           <tbody>
             <tr>
               <th>Knocker</th>
-              <td>{result.knocker === "player" ? "You" : "CPU"}</td>
+              <td>{result.knocker === "player" ? "You" : result.knocker === "cpu" ? "CPU" : "—"}</td>
             </tr>
             <tr>
               <th>Your deadwood</th>
@@ -38,7 +49,11 @@ export default function RoundResultModal({ result, playerScore, cpuScore, isGame
             </tr>
             <tr>
               <th>Points awarded</th>
-              <td>+{result.points} → {result.winner === "player" ? "You" : "CPU"}</td>
+              <td>
+                {result.winner === null
+                  ? "0 (draw)"
+                  : `+${result.points} → ${result.winner === "player" ? "You" : "CPU"}`}
+              </td>
             </tr>
           </tbody>
         </table>

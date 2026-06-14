@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import type { GameState } from "../game/types";
-import { bestDeadwood } from "../game/melds";
+import { bestDeadwood, meldGroups } from "../game/melds";
 import CardView from "./CardView";
 import HandView from "./HandView";
 
@@ -15,17 +16,20 @@ type Props = {
 export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectCard, onDiscard, onKnock }: Props) {
   const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, statusMessage } = state;
 
+  const playerMelds = useMemo(() => meldGroups(playerHand), [playerHand]);
+  const playerDW = useMemo(() => bestDeadwood(playerHand).deadwood, [playerHand]);
+  const handAfterDiscardDW = useMemo(() => {
+    if (!selectedCard) return null;
+    return bestDeadwood(playerHand.filter(c => c.id !== selectedCard)).deadwood;
+  }, [playerHand, selectedCard]);
+
   const canDraw = phase === "awaiting-draw";
   const canDiscard = phase === "awaiting-discard" && !!selectedCard;
-  const canKnock = phase === "awaiting-discard" && !!selectedCard && (() => {
-    const card = playerHand.find(c => c.id === selectedCard);
-    if (!card) return false;
-    const handAfter = playerHand.filter(c => c.id !== selectedCard);
-    return bestDeadwood(handAfter).deadwood <= 10;
-  })();
+  const canKnock =
+    phase === "awaiting-discard" && handAfterDiscardDW !== null && handAfterDiscardDW <= 10;
+  const isGin = canKnock && handAfterDiscardDW === 0;
 
   const topDiscard = discardPile[discardPile.length - 1];
-  const playerDW = bestDeadwood(playerHand).deadwood;
 
   return (
     <div className="game-table">
@@ -81,13 +85,14 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           selectedId={selectedCard}
           onSelect={phase === "awaiting-discard" ? onSelectCard : undefined}
           label="Player hand"
+          meldMap={playerMelds}
         />
         <div className="action-buttons">
           <button className="btn" disabled={!canDraw} onClick={onDrawStock}>Draw Stock</button>
           <button className="btn" disabled={!canDraw || !topDiscard} onClick={onDrawDiscard}>Draw Discard</button>
           <button className="btn btn-primary" disabled={!canDiscard} onClick={onDiscard}>Discard</button>
           <button className="btn btn-knock" disabled={!canKnock} onClick={onKnock}>
-            {canKnock && bestDeadwood(playerHand.filter(c => c.id !== selectedCard)).deadwood === 0 ? "Gin! 🎉" : "Knock"}
+            {isGin ? "Gin! 🎉" : "Knock"}
           </button>
         </div>
       </section>

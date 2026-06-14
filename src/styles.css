@@ -328,6 +328,16 @@ body {
   font-size: 1.1rem;
 }
 
+/* Meld colour-coding: a coloured bar along the bottom of melded cards. */
+.card-meld {
+  border-bottom-width: 4px;
+}
+
+.card-meld-0 { border-bottom-color: #2a9d8f; }
+.card-meld-1 { border-bottom-color: #7b5ea7; }
+.card-meld-2 { border-bottom-color: #e07a3f; }
+.card-meld-3 { border-bottom-color: #c84b6e; }
+
 /* Card back */
 .card-back {
   background: var(--card-back);
@@ -387,6 +397,23 @@ body {
   font-size: 1.1rem;
   margin-bottom: 20px;
   color: #ddd;
+}
+
+.modal-cpu-reveal {
+  margin-bottom: 16px;
+}
+
+.modal-cpu-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.modal-cpu-reveal .hand-view {
+  min-height: 0;
+  justify-content: center;
 }
 
 .modal-table {

@@ -111,3 +111,17 @@ export function bestDeadwood(hand: Card[]): {
   search([], hand);
   return best;
 }
+
+/**
+ * Map each card id to the index of the meld it belongs to in the best
+ * arrangement. Deadwood cards are absent from the map. Used to colour-code
+ * melds in the UI.
+ */
+export function meldGroups(hand: Card[]): Record<string, number> {
+  const { melds } = bestDeadwood(hand);
+  const map: Record<string, number> = {};
+  melds.forEach((meld, i) => {
+    for (const c of meld) map[c.id] = i;
+  });
+  return map;
+}

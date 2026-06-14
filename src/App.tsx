@@ -73,6 +73,7 @@ export default function App() {
       {(state.phase === 'round-over' || state.phase === 'game-over') && state.roundResult && (
         <RoundResultModal
           result={state.roundResult}
+          cpuHand={state.cpuHand}
           playerScore={state.playerScore}
           cpuScore={state.cpuScore}
           isGameOver={state.phase === 'game-over'}

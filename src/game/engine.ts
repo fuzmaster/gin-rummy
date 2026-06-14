@@ -14,6 +14,24 @@ function reshuffleIfNeeded(stock: Card[], discardPile: Card[]): { stock: Card[];
   return { stock: rest, discardPile: [top] };
 }
 
+/** End the current round with no points (stock exhausted with no play possible). */
+function drawnRound(state: GameState): GameState {
+  return {
+    ...state,
+    phase: "round-over",
+    selectedCard: null,
+    roundResult: {
+      winner: null,
+      type: "draw",
+      playerDeadwood: bestDeadwood(state.playerHand).deadwood,
+      cpuDeadwood: bestDeadwood(state.cpuHand).deadwood,
+      points: 0,
+      knocker: null,
+    },
+    statusMessage: "Stock exhausted — the round is a draw. No points awarded.",
+  };
+}
+
 export function createInitialState(): GameState {
   return newRound({
     phase: "awaiting-draw",
@@ -55,7 +73,7 @@ export function newRound(state: GameState): GameState {
 export function playerDrawStock(state: GameState): GameState {
   if (state.phase !== "awaiting-draw") return state;
   const { stock, discardPile } = reshuffleIfNeeded(state.stock, state.discardPile);
-  if (stock.length === 0) return { ...state, statusMessage: "Stock is empty — game is a draw." };
+  if (stock.length === 0) return drawnRound(state);
   const drawn = stock[stock.length - 1];
   const newStock = stock.slice(0, -1);
   return {
@@ -136,6 +154,11 @@ export function playerKnock(state: GameState): GameState {
 
 export function runCpuTurn(state: GameState): GameState {
   if (state.phase !== "cpu-turn") return state;
+
+  // If the CPU can neither draw from stock nor refill it, the round is a draw.
+  if (state.stock.length === 0 && state.discardPile.length <= 1) {
+    return drawnRound(state);
+  }
 
   const { newHand, newStock, newDiscardPile, knocked, discardedCard, drewFrom } =
     cpuTakeTurn(state.cpuHand, state.stock, state.discardPile);
