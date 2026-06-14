@@ -1,0 +1,471 @@
+/* ============================================================
+   Gin Rummy — styles.css
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --green:       #2d6a2d;
+  --green-dark:  #1b4a1b;
+  --green-light: #3a8a3a;
+  --felt:        #256325;
+  --card-bg:     #fffef9;
+  --card-back:   #1a3a6e;
+  --card-back-pattern: #2a5abb;
+  --red:         #cc2222;
+  --black:       #111;
+  --gold:        #d4a017;
+  --radius:      8px;
+  --shadow:      0 2px 8px rgba(0,0,0,0.4);
+  --font:        'Segoe UI', system-ui, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--green-dark);
+  color: #eee;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   App layout
+   ============================================================ */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Scoreboard / Header
+   ============================================================ */
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--green-dark);
+  border-bottom: 2px solid var(--gold);
+  padding: 10px 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.game-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+  flex: 1;
+}
+
+.score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+
+.score-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ============================================================
+   Game table
+   ============================================================ */
+.game-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, var(--felt) 0%, var(--green-dark) 100%);
+}
+
+/* ============================================================
+   CPU / Player areas
+   ============================================================ */
+.cpu-area,
+.player-area {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.area-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #bbb;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   Hand view
+   ============================================================ */
+.hand-view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 100px;
+  align-items: flex-end;
+}
+
+.empty-hand {
+  color: #777;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   Center area (stock + discard)
+   ============================================================ */
+.center-area {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+}
+
+.pile-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pile-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #bbb;
+}
+
+.pile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pile-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   Status message
+   ============================================================ */
+.status-message {
+  max-width: 600px;
+  text-align: center;
+  font-size: 1rem;
+  background: rgba(0,0,0,0.35);
+  border-radius: 6px;
+  padding: 8px 20px;
+  color: #e0e0e0;
+}
+
+/* ============================================================
+   Action buttons
+   ============================================================ */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2a5a2a;
+  color: #e8e8e8;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #3a7a3a;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  background: #1a3a1a;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #1a5a8a;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2a7ab0;
+}
+
+.btn-primary:disabled {
+  background: #0e2a40;
+  color: #555;
+}
+
+.btn-knock {
+  background: var(--gold);
+  color: #111;
+}
+
+.btn-knock:hover:not(:disabled) {
+  background: #e8b820;
+}
+
+.btn-knock:disabled {
+  background: #5a4a00;
+  color: #888;
+}
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card {
+  width: 62px;
+  height: 90px;
+  border-radius: 6px;
+  border: 1.5px solid #bbb;
+  background: var(--card-bg);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, 'Times New Roman', serif;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.card[role="button"] {
+  cursor: pointer;
+}
+
+.card[role="button"]:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+.card-selected {
+  transform: translateY(-10px) !important;
+  box-shadow: 0 8px 20px rgba(255,215,0,0.7) !important;
+  border-color: var(--gold) !important;
+}
+
+.card-small {
+  width: 46px;
+  height: 68px;
+}
+
+.card-red {
+  color: var(--red);
+}
+
+.card-black {
+  color: var(--black);
+}
+
+.card-corner {
+  position: absolute;
+  font-size: 0.7rem;
+  line-height: 1.1;
+  font-weight: 700;
+  text-align: center;
+}
+
+.card-tl {
+  top: 4px;
+  left: 5px;
+}
+
+.card-br {
+  bottom: 4px;
+  right: 5px;
+  transform: rotate(180deg);
+}
+
+.card-center {
+  font-size: 1.5rem;
+}
+
+.card-small .card-corner {
+  font-size: 0.6rem;
+}
+
+.card-small .card-center {
+  font-size: 1.1rem;
+}
+
+/* Card back */
+.card-back {
+  background: var(--card-back);
+  border-color: #334;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      var(--card-back-pattern) 0px,
+      var(--card-back-pattern) 3px,
+      transparent 3px,
+      transparent 9px
+    );
+}
+
+/* Empty pile placeholder */
+.card-empty {
+  border: 2px dashed #555;
+  background: rgba(0,0,0,0.2);
+  color: #555;
+  font-size: 1.5rem;
+}
+
+/* ============================================================
+   Modal
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal {
+  background: #1e3a1e;
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+  color: #e8e8e8;
+}
+
+.modal-title {
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.modal-result-type {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: #ddd;
+}
+
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.modal-table th,
+.modal-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a5a2a;
+  text-align: left;
+}
+
+.modal-table th {
+  color: #aaa;
+  font-weight: 500;
+  width: 50%;
+}
+
+.modal-table td {
+  font-weight: 700;
+  color: #fff;
+}
+
+.modal-scores {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.modal-scores strong {
+  color: var(--gold);
+  font-size: 1.2rem;
+}
+
+.modal-gameover {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  color: var(--gold);
+}
+
+.modal-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 600px) {
+  .scoreboard {
+    padding: 8px 12px;
+  }
+
+  .game-title {
+    font-size: 1.1rem;
+  }
+
+  .card {
+    width: 50px;
+    height: 74px;
+  }
+
+  .card-center {
+    font-size: 1.1rem;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+
+  .btn {
+    padding: 7px 12px;
+    font-size: 0.82rem;
+  }
+}
