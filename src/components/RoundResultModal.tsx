@@ -9,6 +9,7 @@ type Props = {
   cpuScore: number;
   isGameOver: boolean;
   onNext: () => void;
+  onMenu: () => void;
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -18,7 +19,7 @@ const TYPE_LABEL: Record<string, string> = {
   draw: "Draw",
 };
 
-export default function RoundResultModal({ result, cpuHand, playerScore, cpuScore, isGameOver, onNext }: Props) {
+export default function RoundResultModal({ result, cpuHand, playerScore, cpuScore, isGameOver, onNext, onMenu }: Props) {
   const winnerLabel =
     result.winner === "player" ? "You win" : result.winner === "cpu" ? "CPU wins" : "No winner";
   const cpuMelds = meldGroups(cpuHand);
@@ -69,9 +70,16 @@ export default function RoundResultModal({ result, cpuHand, playerScore, cpuScor
           </p>
         ) : null}
 
-        <button className="btn btn-primary modal-btn" onClick={onNext}>
-          {isGameOver ? "Play Again" : "Next Round"}
-        </button>
+        <div className="modal-actions">
+          <button className="btn btn-primary modal-btn" onClick={onNext}>
+            {isGameOver ? "Play Again" : "Next Round"}
+          </button>
+          {isGameOver && (
+            <button className="btn modal-btn" onClick={onMenu}>
+              Main Menu
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

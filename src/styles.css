@@ -467,9 +467,204 @@ body {
 }
 
 /* ============================================================
+   Modal actions
+   ============================================================ */
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================================
+   Menu screens (main menu / how to play / settings)
+   ============================================================ */
+.menu-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(ellipse at center, var(--felt) 0%, var(--green-dark) 100%);
+}
+
+.menu-card {
+  background: #1e3a1e;
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+.menu-card-wide {
+  max-width: 560px;
+  text-align: left;
+}
+
+.menu-title {
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.menu-subtitle {
+  color: #cfcfcf;
+  margin-bottom: 24px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.menu-main-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+/* Lifetime stats panel */
+.menu-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  border-top: 1px solid #2a5a2a;
+  padding-top: 16px;
+}
+
+.menu-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.menu-stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.menu-stat-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9a9a9a;
+}
+
+/* How to play body */
+.howto-body {
+  margin-bottom: 20px;
+  color: #e0e0e0;
+  line-height: 1.5;
+}
+
+.howto-body h2 {
+  color: var(--gold);
+  font-size: 1.05rem;
+  margin: 16px 0 6px;
+}
+
+.howto-body p {
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+
+.howto-body ul,
+.howto-body ol {
+  margin: 0 0 6px 20px;
+  font-size: 0.92rem;
+}
+
+.howto-body li {
+  margin-bottom: 4px;
+}
+
+/* Settings */
+.settings-group {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.settings-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.settings-options {
+  display: flex;
+  gap: 10px;
+}
+
+.settings-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px;
+}
+
+.settings-option-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.settings-option-sub {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.settings-option-active {
+  background: var(--gold);
+  color: #111;
+}
+
+.settings-option-active:hover:not(:disabled) {
+  background: #e8b820;
+}
+
+.settings-hint {
+  font-size: 0.78rem;
+  color: #9a9a9a;
+  margin-top: 8px;
+}
+
+/* In-game menu / quit button */
+.menu-quit-btn {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.game-target {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #bdbdbd;
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 600px) {
+  .menu-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .menu-card {
+    padding: 24px;
+  }
+
   .scoreboard {
     padding: 8px 12px;
   }

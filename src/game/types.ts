@@ -36,4 +36,6 @@ export type GameState = {
   statusMessage: string;
   roundResult: RoundResult | null;
   drewFromDiscard: boolean;
+  targetScore: number;   // points needed to win the game
+  gameId: number;        // unique per game, used to record stats once
 };

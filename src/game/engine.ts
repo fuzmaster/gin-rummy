@@ -4,7 +4,9 @@ import { bestDeadwood } from "./melds";
 import { calculateScore } from "./scoring";
 import { cpuTakeTurn } from "./cpu";
 
-const WIN_SCORE = 100;
+export const DEFAULT_TARGET_SCORE = 100;
+
+let gameCounter = 0;
 
 function reshuffleIfNeeded(stock: Card[], discardPile: Card[]): { stock: Card[]; discardPile: Card[] } {
   if (stock.length > 0) return { stock, discardPile };
@@ -32,7 +34,7 @@ function drawnRound(state: GameState): GameState {
   };
 }
 
-export function createInitialState(): GameState {
+export function createInitialState(targetScore: number = DEFAULT_TARGET_SCORE): GameState {
   return newRound({
     phase: "awaiting-draw",
     stock: [],
@@ -46,6 +48,8 @@ export function createInitialState(): GameState {
     statusMessage: "",
     roundResult: null,
     drewFromDiscard: false,
+    targetScore,
+    gameId: ++gameCounter,
   });
 }
 
@@ -137,7 +141,7 @@ export function playerKnock(state: GameState): GameState {
   const result = calculateScore("player", newHand, state.cpuHand);
   const newPlayerScore = state.playerScore + (result.winner === "player" ? result.points : 0);
   const newCpuScore = state.cpuScore + (result.winner === "cpu" ? result.points : 0);
-  const phase = newPlayerScore >= WIN_SCORE || newCpuScore >= WIN_SCORE ? "game-over" : "round-over";
+  const phase = newPlayerScore >= state.targetScore || newCpuScore >= state.targetScore ? "game-over" : "round-over";
 
   return {
     ...state,
@@ -169,7 +173,7 @@ export function runCpuTurn(state: GameState): GameState {
     const result = calculateScore("cpu", state.playerHand, newHand);
     const newPlayerScore = state.playerScore + (result.winner === "player" ? result.points : 0);
     const newCpuScore = state.cpuScore + (result.winner === "cpu" ? result.points : 0);
-    const phase = newPlayerScore >= WIN_SCORE || newCpuScore >= WIN_SCORE ? "game-over" : "round-over";
+    const phase = newPlayerScore >= state.targetScore || newCpuScore >= state.targetScore ? "game-over" : "round-over";
     return {
       ...state,
       cpuHand: newHand,
