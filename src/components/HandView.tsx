@@ -9,13 +9,18 @@ type Props = {
   faceDown?: boolean;
   label?: string;
   small?: boolean;
+  /** Render as an overlapping fan instead of a wrapped row. */
+  fan?: boolean;
+  /** Stronger overlap for the (face-down) CPU hand. */
+  fanCpu?: boolean;
   /** Map of card id -> meld group index for colour-coding melds. */
   meldMap?: Record<string, number>;
 };
 
-export default function HandView({ cards, selectedId, markedIds, onSelect, faceDown = false, label, small = false, meldMap }: Props) {
+export default function HandView({ cards, selectedId, markedIds, onSelect, faceDown = false, label, small = false, fan = false, fanCpu = false, meldMap }: Props) {
+  const cls = `hand-view${fan ? " hand-fan" : ""}${fanCpu ? " hand-fan-cpu" : ""}`;
   return (
-    <div className="hand-view" aria-label={label ?? "hand"}>
+    <div className={cls} aria-label={label ?? "hand"}>
       {cards.map(card => (
         <CardView
           key={card.id}
