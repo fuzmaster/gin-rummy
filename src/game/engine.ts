@@ -24,6 +24,7 @@ function drawnRound(state: GameState): GameState {
     phase: "round-over",
     selectedCard: null,
     markedCards: [],
+    streak: 0,
     roundResult: {
       winner: null,
       type: "draw",
@@ -50,6 +51,7 @@ export function createInitialState(
     markedCards: [],
     playerScore: 0,
     cpuScore: 0,
+    streak: 0,
     round: 0,
     statusMessage: "",
     roundResult: null,
@@ -191,6 +193,7 @@ export function playerKnock(state: GameState): GameState {
     phase,
     playerScore: newPlayerScore,
     cpuScore: newCpuScore,
+    streak: result.winner === "player" ? state.streak + 1 : 0,
     roundResult: result,
     statusMessage: dw === 0 ? "Gin! You win this round!" : "You knocked!",
   };
@@ -222,6 +225,7 @@ export function runCpuTurn(state: GameState): GameState {
       phase,
       playerScore: newPlayerScore,
       cpuScore: newCpuScore,
+      streak: result.winner === "player" ? state.streak + 1 : 0,
       roundResult: result,
       lastDrawnId: null,
       lastDiscardBy: "cpu",

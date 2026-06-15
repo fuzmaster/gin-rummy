@@ -207,6 +207,7 @@ export default function App() {
         cpuScore={state.cpuScore}
         round={state.round}
         targetScore={state.targetScore}
+        streak={state.streak}
         onQuit={() => setScreen('menu')}
       />
       <GameTable

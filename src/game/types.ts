@@ -35,6 +35,7 @@ export type GameState = {
   markedCards: string[];         // cards highlighted for planning (includes selectedCard)
   playerScore: number;
   cpuScore: number;
+  streak: number;   // consecutive rounds the player has won this game
   round: number;
   statusMessage: string;
   roundResult: RoundResult | null;

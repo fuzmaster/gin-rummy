@@ -55,13 +55,88 @@ body {
    ============================================================ */
 .scoreboard {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 8px;
   background: rgba(0,0,0,0.32);
   border-bottom: 2px solid rgba(212,160,23,0.7);
   padding: 8px 16px;
+}
+
+.scoreboard-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   gap: 14px;
   flex-wrap: wrap;
+}
+
+/* Progress toward the target score */
+.score-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-tag {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 30px;
+  flex-shrink: 0;
+}
+
+.progress-tag.you { color: #6fd089; }
+.progress-tag.cpu { color: #e88; }
+
+.progress-track {
+  flex: 1;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.4);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.progress-fill.you { background: linear-gradient(90deg, #2e9d4f, #5cd07a); }
+.progress-fill.cpu { background: linear-gradient(90deg, #b04a4a, #e07070); }
+
+.progress-num {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #cfcfcf;
+  width: 46px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.streak-badge {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #ffd76a;
+  animation: streak-pop 0.3s ease;
+}
+
+@keyframes streak-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 
 .scoreboard-title {
@@ -245,12 +320,14 @@ body {
   transition: transform 0.12s, margin 0.12s, box-shadow 0.15s;
 }
 
+/* Overlap is computed per-hand (JS sets --fan-overlap) so big cards always fit;
+   the fixed fallbacks apply until measured / for non-dynamic fans. */
 .hand-fan .card:not(:first-child) {
-  margin-left: -34px;
+  margin-left: calc(-1 * var(--fan-overlap, 40px));
 }
 
 .hand-fan.hand-fan-cpu .card:not(:first-child) {
-  margin-left: -52px;
+  margin-left: calc(-1 * var(--fan-overlap, 58px));
 }
 
 .hand-fan .card[role="button"]:hover,
@@ -341,13 +418,13 @@ body {
   justify-content: center;
   gap: 8px;
   text-align: center;
-  font-size: 0.98rem;
-  font-weight: 500;
+  font-size: 1.08rem;
+  font-weight: 600;
   background: rgba(0,0,0,0.4);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
-  padding: 9px 24px;
-  color: #eaeaea;
+  padding: 10px 24px;
+  color: #f2f2f2;
 }
 
 .status-icon {
@@ -455,6 +532,14 @@ body {
   margin-top: 12px;
 }
 
+/* Big, easy-to-tap controls (kid-friendly). */
+.action-buttons .btn {
+  flex: 1 1 auto;
+  min-height: 50px;
+  padding: 12px 18px;
+  font-size: 1.05rem;
+}
+
 .btn {
   padding: 8px 18px;
   border: none;
@@ -523,9 +608,9 @@ body {
    Cards
    ============================================================ */
 .card {
-  width: 72px;
-  height: 104px;
-  border-radius: 8px;
+  width: 84px;
+  height: 120px;
+  border-radius: 9px;
   border: 1px solid #c9c9c9;
   background: linear-gradient(157deg, #ffffff 0%, #f3f0e6 100%);
   position: relative;
@@ -562,8 +647,8 @@ body {
 }
 
 .card-small {
-  width: 52px;
-  height: 76px;
+  width: 58px;
+  height: 84px;
 }
 
 /* Card hidden while its flying clone travels (keeps layout). */

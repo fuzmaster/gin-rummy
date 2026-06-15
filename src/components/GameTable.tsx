@@ -141,7 +141,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
       <section className="cpu-area" aria-label="CPU hand">
         <div className="area-label">CPU · {cpuHand.length} cards</div>
         <div ref={cpuRef}>
-          <HandView cards={cpuHand} faceDown fan fanCpu label="CPU hand" />
+          <HandView cards={cpuHand} faceDown fan fanCpu dynamicFit label="CPU hand" />
         </div>
       </section>
 
@@ -245,6 +245,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             markedIds={markedCards}
             onSelect={onSelect}
             fan
+            dynamicFit
             drawnId={lastDrawnId}
             hiddenId={hiddenId}
             hintedId={hintCardId}
