@@ -5,9 +5,15 @@ import { RANK_ORDER } from "../game/cards";
 import CardView from "./CardView";
 import HandView from "./HandView";
 import FlyingCard, { type Flight } from "./FlyingCard";
+import { suggestMove, type Hint } from "../game/hints";
 import { playDraw, playDiscard } from "../sfx";
 
 const SUIT_ORDER: Record<string, number> = { S: 0, H: 1, D: 2, C: 3 };
+const SUIT_SYMBOL: Record<string, string> = { S: "♠", H: "♥", D: "♦", C: "♣" };
+
+function shortLabel(card: Card): string {
+  return `${card.rank}${SUIT_SYMBOL[card.suit]}`;
+}
 
 function centerOf(el: Element | null): { x: number; y: number } | null {
   if (!el) return null;
@@ -105,6 +111,30 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
 
   const topDiscard = discardPile[discardPile.length - 1];
 
+  // One-tap hint — clears itself as soon as the situation changes.
+  const [hint, setHint] = useState<Hint | null>(null);
+  useEffect(() => setHint(null), [phase, selectedCard, lastDrawnId]);
+  const canHint = phase === "awaiting-draw" || phase === "awaiting-discard";
+
+  const hintCardId = hint?.kind === "discard" ? hint.card.id : null;
+  const hintStock = hint?.kind === "draw" && hint.source === "stock";
+  const hintDiscardPile = hint?.kind === "draw" && hint.source === "discard";
+  const hintKnock = hint?.kind === "discard" && hint.thenKnock;
+
+  let hintText = "";
+  if (hint?.kind === "draw") {
+    hintText = hint.source === "discard" && hint.card
+      ? `Take the ${shortLabel(hint.card)} from the discard pile`
+      : "Draw from the deck";
+  } else if (hint?.kind === "discard") {
+    hintText = hint.thenKnock
+      ? `Discard the ${shortLabel(hint.card)}, then Knock!`
+      : `Discard the ${shortLabel(hint.card)}`;
+  }
+
+  // Glanceable turn indicator.
+  const turnIcon = phase === "cpu-turn" ? "🤖" : phase === "awaiting-draw" ? "🫳" : "🃏";
+
   return (
     <div className="game-table">
       {/* CPU area */}
@@ -131,6 +161,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
               meldMap={meldMap}
               drawnId={lastDrawnId}
               hiddenId={hiddenId}
+              hintedId={hintCardId}
               label={`Meld ${i + 1}`}
             />
           ))
@@ -143,7 +174,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           <div className="pile-label">Stock</div>
           <button
             ref={stockRef}
-            className="pile-btn"
+            className={`pile-btn${hintStock ? " hint-glow" : ""}`}
             disabled={!canDraw}
             onClick={onDrawStock}
             aria-label={`Draw from stock, ${stock.length} cards left`}
@@ -160,7 +191,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           <div className="pile-label">Discard</div>
           <button
             ref={discardRef}
-            className="pile-btn"
+            className={`pile-btn${hintDiscardPile ? " hint-glow" : ""}`}
             disabled={!canDraw || !topDiscard}
             onClick={onDrawDiscard}
             aria-label={topDiscard ? `Draw ${topDiscard.id} from discard` : "Discard pile empty"}
@@ -174,8 +205,12 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
         </div>
       </section>
 
-      {/* Status */}
-      <div className="status-message" role="status" aria-live="polite">{statusMessage}</div>
+      {/* Status — glanceable: turn icon + spinner during the CPU turn */}
+      <div className={`status-message status-${phase}`} role="status" aria-live="polite">
+        {phase === "cpu-turn" && <span className="status-spinner" aria-hidden="true" />}
+        <span className="status-icon" aria-hidden="true">{turnIcon}</span>
+        {statusMessage}
+      </div>
 
       {/* Player deadwood + controls */}
       <section className="player-area" aria-label="Your hand">
@@ -184,14 +219,25 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             Deadwood <strong>{playerDW}</strong>
             {playerDW === 0 ? " · Gin!" : playerDW <= 10 ? " · can knock" : ""}
           </span>
-          <button
-            className="btn btn-sort"
-            onClick={() => setSortMode(m => (m === "suit" ? "rank" : "suit"))}
-            aria-label={`Sort deadwood by ${sortMode === "suit" ? "rank" : "suit"}`}
-          >
-            ⇄ Sort
-          </button>
+          <div className="area-header-btns">
+            <button
+              className="btn btn-hint"
+              disabled={!canHint}
+              onClick={() => setHint(suggestMove(state))}
+              aria-label="Show a suggested move"
+            >
+              💡 Hint
+            </button>
+            <button
+              className="btn btn-sort"
+              onClick={() => setSortMode(m => (m === "suit" ? "rank" : "suit"))}
+              aria-label={`Sort deadwood by ${sortMode === "suit" ? "rank" : "suit"}`}
+            >
+              ⇄ Sort
+            </button>
+          </div>
         </div>
+        {hint && <div className="hint-banner" role="status">💡 {hintText}</div>}
         <div ref={handRef}>
           <HandView
             cards={deadwoodCards}
@@ -201,6 +247,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             fan
             drawnId={lastDrawnId}
             hiddenId={hiddenId}
+            hintedId={hintCardId}
             label="Your deadwood"
           />
         </div>
@@ -215,7 +262,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           <button className="btn" disabled={!canDraw || !topDiscard} onClick={onDrawDiscard}>♻ Draw Discard</button>
           <button className="btn btn-primary" disabled={!canDiscard} onClick={onDiscard}>Discard</button>
           <button
-            className={`btn btn-knock${canKnock ? " btn-knock-ready" : ""}`}
+            className={`btn btn-knock${canKnock ? " btn-knock-ready" : ""}${hintKnock ? " hint-glow" : ""}`}
             disabled={!canKnock}
             onClick={onKnock}
           >

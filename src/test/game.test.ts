@@ -4,6 +4,7 @@ import { isSet, isRun, bestDeadwood, deadwoodValue, applyLayoffs } from '../game
 import { calculateScore } from '../game/scoring';
 import { cpuChooseDiscard } from '../game/cpu';
 import { createInitialState, playerDrawStock, playerSelectCard } from '../game/engine';
+import { suggestMove } from '../game/hints';
 import type { Card } from '../game/types';
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -272,6 +273,24 @@ describe('playerSelectCard — multi-mark', () => {
     s = playerSelectCard(s, a.id);
     expect(s.markedCards).toEqual([]);
     expect(s.selectedCard).toBeNull();
+  });
+});
+
+// ── Hints ─────────────────────────────────────────────────────
+describe('suggestMove', () => {
+  it('suggests a draw source at the start of a turn', () => {
+    const hint = suggestMove(createInitialState());
+    expect(hint?.kind).toBe('draw');
+    if (hint?.kind === 'draw') expect(['stock', 'discard']).toContain(hint.source);
+  });
+
+  it('after drawing, suggests the lowest-deadwood discard', () => {
+    const s = playerDrawStock(createInitialState());
+    const hint = suggestMove(s);
+    expect(hint?.kind).toBe('discard');
+    if (hint?.kind === 'discard') {
+      expect(hint.card.id).toBe(cpuChooseDiscard(s.playerHand).id);
+    }
   });
 });
 

@@ -336,6 +336,10 @@ body {
    ============================================================ */
 .status-message {
   max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
   font-size: 0.98rem;
   font-weight: 500;
@@ -344,6 +348,87 @@ body {
   border-radius: 999px;
   padding: 9px 24px;
   color: #eaeaea;
+}
+
+.status-icon {
+  font-size: 1.05rem;
+}
+
+/* Your-turn vs CPU-turn accents so whose move it is reads at a glance. */
+.status-awaiting-draw,
+.status-awaiting-discard {
+  border-color: rgba(80, 200, 110, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(80, 200, 110, 0.25);
+}
+
+.status-cpu-turn {
+  border-color: rgba(90, 170, 255, 0.5);
+}
+
+/* Spinner shown during the CPU turn. */
+.status-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #5aa9ff;
+  border-radius: 50%;
+  animation: status-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes status-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Hint -------------------------------------------------------------- */
+.area-header-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-hint {
+  background: #7a5a18;
+  color: #ffe9a8;
+  border-radius: 999px;
+}
+
+.btn-hint:hover:not(:disabled) {
+  background: #9a7320;
+}
+
+.hint-banner {
+  margin-top: 8px;
+  align-self: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffe9a8;
+  background: rgba(212, 160, 23, 0.16);
+  border: 1px solid rgba(212, 160, 23, 0.5);
+  border-radius: 999px;
+  padding: 5px 14px;
+  animation: hint-pop 0.2s ease;
+}
+
+@keyframes hint-pop {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulsing gold glow on the hinted pile / button. */
+.hint-glow {
+  animation: hint-glow 1s ease-in-out infinite;
+  border-radius: 10px;
+}
+
+@keyframes hint-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 160, 23, 0.0); }
+  50%      { box-shadow: 0 0 16px 4px rgba(212, 160, 23, 0.85); }
+}
+
+/* Spotlight the hinted card. */
+.card-hint {
+  box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(212, 160, 23, 0.9) !important;
+  z-index: 6;
 }
 
 /* ============================================================

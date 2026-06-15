@@ -18,11 +18,13 @@ type Props = {
   hidden?: boolean;
   /** Position in its hand, used to stagger the deal-in cascade. */
   index?: number;
+  /** Spotlight this card as the hinted move. */
+  hinted?: boolean;
 };
 
 const MELD_COLORS = 4;
 
-export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null, hidden = false, index }: Props) {
+export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null, hidden = false, index, hinted = false }: Props) {
   if (faceDown) {
     return (
       <div className={`card card-back${small ? " card-small" : ""}`} aria-label="face-down card" />
@@ -44,7 +46,7 @@ export default function CardView({ card, faceDown = false, selected = false, mar
   return (
     <div
       data-card-id={card.id}
-      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}${hidden ? " card-hidden" : ""}`}
+      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}${hidden ? " card-hidden" : ""}${hinted ? " card-hint" : ""}`}
       style={dealDelay}
       onClick={onClick}
       role={onClick ? "button" : undefined}
