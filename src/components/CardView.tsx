@@ -16,16 +16,21 @@ type Props = {
   placedBy?: "player" | "cpu" | null;
   /** Hide this card (while a flying clone travels in its place). */
   hidden?: boolean;
+  /** Position in its hand, used to stagger the deal-in cascade. */
+  index?: number;
 };
 
 const MELD_COLORS = 4;
 
-export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null, hidden = false }: Props) {
+export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null, hidden = false, index }: Props) {
   if (faceDown) {
     return (
       <div className={`card card-back${small ? " card-small" : ""}`} aria-label="face-down card" />
     );
   }
+
+  // Stagger the deal-in cascade; freshly drawn/placed cards animate immediately.
+  const dealDelay = drawn || placedBy ? undefined : { animationDelay: `${Math.min(index ?? 0, 12) * 0.045}s` };
 
   const meldClass = meldGroup !== undefined ? ` card-meld card-meld-${meldGroup % MELD_COLORS}` : "";
   const markedClass = marked && !selected ? " card-marked" : "";
@@ -40,6 +45,7 @@ export default function CardView({ card, faceDown = false, selected = false, mar
     <div
       data-card-id={card.id}
       className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}${hidden ? " card-hidden" : ""}`}
+      style={dealDelay}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}

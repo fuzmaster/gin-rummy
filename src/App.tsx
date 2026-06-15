@@ -25,7 +25,20 @@ import {
   emptyStats,
   recordGame,
 } from './storage';
-import { setMuted, playDeal, playWin, playLose } from './sfx';
+import confetti from 'canvas-confetti';
+import { setMuted, playDeal, playWin, playBigWin, playLose } from './sfx';
+
+// Celebratory burst — a bigger shower for Gin.
+function burstConfetti(big: boolean) {
+  const colors = ['#d4a017', '#e8b820', '#3cb45a', '#f7efd6'];
+  confetti({ particleCount: big ? 120 : 70, spread: big ? 80 : 65, origin: { y: 0.5 }, colors });
+  if (big) {
+    setTimeout(() => {
+      confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors });
+      confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors });
+    }, 180);
+  }
+}
 
 type Action =
   | { type: 'DRAW_STOCK' }
@@ -80,8 +93,14 @@ export default function App() {
     if ((state.phase === 'round-over' || state.phase === 'game-over') && state.roundResult) {
       if (resultRoundRef.current !== state.round) {
         resultRoundRef.current = state.round;
-        if (state.roundResult.winner === 'player') playWin();
-        else if (state.roundResult.winner === 'cpu') playLose();
+        if (state.roundResult.winner === 'player') {
+          const gin = state.roundResult.type === 'gin';
+          if (gin) playBigWin();
+          else playWin();
+          burstConfetti(gin);
+        } else if (state.roundResult.winner === 'cpu') {
+          playLose();
+        }
       }
     }
   }, [state.phase, state.round, state.roundResult]);

@@ -25,10 +25,11 @@ export default function HandView({ cards, selectedId, markedIds, onSelect, faceD
   const cls = `hand-view${fan ? " hand-fan" : ""}${fanCpu ? " hand-fan-cpu" : ""}`;
   return (
     <div className={cls} aria-label={label ?? "hand"}>
-      {cards.map(card => (
+      {cards.map((card, i) => (
         <CardView
           key={card.id}
           card={card}
+          index={i}
           faceDown={faceDown}
           small={small}
           selected={!faceDown && selectedId === card.id}

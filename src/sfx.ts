@@ -55,23 +55,25 @@ function noiseBurst(duration: number, freq: number, q: number, gain: number): vo
   src.stop(now + duration + 0.02);
 }
 
-/** A short tone (for chimes). */
-function tone(freq: number, start: number, duration: number, gain: number): void {
+type ToneOpts = { duration?: number; type?: OscillatorType; gain?: number; delay?: number; slideTo?: number };
+
+/** A single shaped tone (chimes / arpeggios). */
+function tone(freq: number, { duration = 0.12, type = "sine", gain = 0.18, delay = 0, slideTo }: ToneOpts = {}): void {
   if (muted) return;
   const ac = getCtx();
   if (!ac) return;
+  const start = ac.currentTime + delay;
   const osc = ac.createOscillator();
-  osc.type = "triangle";
-  const g = ac.createGain();
-  const t0 = ac.currentTime + start;
-  osc.frequency.value = freq;
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.linearRampToValueAtTime(gain, t0 + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
-  osc.connect(g);
-  g.connect(ac.destination);
-  osc.start(t0);
-  osc.stop(t0 + duration + 0.02);
+  const env = ac.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, start);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + duration);
+  env.gain.setValueAtTime(0.0001, start);
+  env.gain.exponentialRampToValueAtTime(gain, start + 0.01);
+  env.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(env).connect(ac.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
 }
 
 /** Drawing a card — a quick airy slide. */
@@ -84,19 +86,26 @@ export function playDiscard(): void {
   noiseBurst(0.11, 1300, 0.5, 0.3);
 }
 
-/** Dealing a new hand — one soft riffle. */
+/** Dealing a new hand — a quick flurry of soft card flicks. */
 export function playDeal(): void {
-  noiseBurst(0.28, 1600, 0.4, 0.18);
+  for (let i = 0; i < 5; i++) {
+    tone(420 + i * 30, { duration: 0.06, type: "triangle", gain: 0.12, delay: i * 0.06 });
+  }
 }
 
-/** Knock / gin — a short happy two-note chime. */
+/** Knock — a bright C–E–G–C arpeggio. */
 export function playWin(): void {
-  tone(660, 0, 0.16, 0.18);
-  tone(880, 0.12, 0.22, 0.18);
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f, i) => tone(f, { duration: 0.16, type: "sine", gain: 0.16, delay: i * 0.09 }));
 }
 
-/** Losing a round — a soft downward two-note. */
+/** Gin — a longer, fuller fanfare. */
+export function playBigWin(): void {
+  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98];
+  notes.forEach((f, i) => tone(f, { duration: 0.22, type: "triangle", gain: 0.18, delay: i * 0.1 }));
+}
+
+/** Losing a round — a soft downward slide. */
 export function playLose(): void {
-  tone(440, 0, 0.18, 0.16);
-  tone(330, 0.14, 0.26, 0.16);
+  tone(220, { duration: 0.3, type: "sawtooth", gain: 0.12, slideTo: 120 });
 }
