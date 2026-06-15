@@ -105,11 +105,11 @@ export default function App() {
     }
   }, [state.phase, state.round, state.roundResult]);
 
-  // Auto-trigger CPU turn after player discards. ~450ms lets the player's discard
-  // animation land, then the CPU acts immediately — removes the old dead wait.
+  // Auto-trigger CPU turn after player discards. ~300ms lets the player's discard
+  // flight (240ms) land, then the CPU acts immediately — removes the old dead wait.
   useEffect(() => {
     if (screen === 'game' && state.phase === 'cpu-turn') {
-      const timer = setTimeout(() => dispatch({ type: 'CPU_TURN' }), 450);
+      const timer = setTimeout(() => dispatch({ type: 'CPU_TURN' }), 300);
       return () => clearTimeout(timer);
     }
   }, [state.phase, screen]);

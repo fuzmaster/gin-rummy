@@ -17,7 +17,7 @@ type Props = {
   onDone: () => void;
 };
 
-const DURATION = 420;
+const DURATION = 240;
 
 /** A single card that animates from `from` to `to` over a fixed overlay layer. */
 export default function FlyingCard({ flight, onDone }: Props) {

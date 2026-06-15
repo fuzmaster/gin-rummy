@@ -219,7 +219,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             disabled={!canKnock}
             onClick={onKnock}
           >
-            {isGin ? "Gin! 🎉" : "Knock"}
+            {isGin ? "Gin! 🎉" : handAfterDiscardDW !== null ? `Knock (${handAfterDiscardDW})` : "Knock"}
           </button>
         </div>
       </section>
