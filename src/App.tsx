@@ -25,6 +25,7 @@ import {
   emptyStats,
   recordGame,
 } from './storage';
+import { setMuted, playDeal, playWin, playLose } from './sfx';
 
 type Action =
   | { type: 'DRAW_STOCK' }
@@ -58,6 +59,32 @@ export default function App() {
   const [settings, setSettings] = useState(loadSettings);
   const [stats, setStats] = useState(loadStats);
   const recordedGameRef = useRef<number | null>(null);
+  const lastRoundRef = useRef<number>(0);
+  const resultRoundRef = useRef<number>(-1);
+
+  // Keep the audio engine in sync with the sound setting.
+  useEffect(() => {
+    setMuted(!settings.soundOn);
+  }, [settings.soundOn]);
+
+  // Deal sound at the start of each new round (while playing).
+  useEffect(() => {
+    if (screen === 'game' && state.round !== lastRoundRef.current) {
+      lastRoundRef.current = state.round;
+      playDeal();
+    }
+  }, [state.round, screen]);
+
+  // Win / lose chime when a round resolves.
+  useEffect(() => {
+    if ((state.phase === 'round-over' || state.phase === 'game-over') && state.roundResult) {
+      if (resultRoundRef.current !== state.round) {
+        resultRoundRef.current = state.round;
+        if (state.roundResult.winner === 'player') playWin();
+        else if (state.roundResult.winner === 'cpu') playLose();
+      }
+    }
+  }, [state.phase, state.round, state.roundResult]);
 
   // Auto-trigger CPU turn after player discards
   useEffect(() => {
@@ -107,6 +134,14 @@ export default function App() {
     });
   }, []);
 
+  const handleSoundChange = useCallback((soundOn: boolean) => {
+    setSettings(prev => {
+      const next = { ...prev, soundOn };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
   const handleResetStats = useCallback(() => {
     const next = emptyStats();
     saveStats(next);
@@ -135,8 +170,10 @@ export default function App() {
       <Settings
         targetScore={settings.targetScore}
         difficulty={settings.difficulty}
+        soundOn={settings.soundOn}
         onTargetChange={handleTargetChange}
         onDifficultyChange={handleDifficultyChange}
+        onSoundChange={handleSoundChange}
         onResetStats={handleResetStats}
         onBack={() => setScreen('menu')}
       />

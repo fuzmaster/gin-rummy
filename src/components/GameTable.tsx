@@ -1,11 +1,19 @@
-import { useMemo, useState } from "react";
-import type { GameState } from "../game/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Card, GameState } from "../game/types";
 import { bestDeadwood } from "../game/melds";
 import { RANK_ORDER } from "../game/cards";
 import CardView from "./CardView";
 import HandView from "./HandView";
+import FlyingCard, { type Flight } from "./FlyingCard";
+import { playDraw, playDiscard } from "../sfx";
 
 const SUIT_ORDER: Record<string, number> = { S: 0, H: 1, D: 2, C: 3 };
+
+function centerOf(el: Element | null): { x: number; y: number } | null {
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
 
 type Props = {
   state: GameState;
@@ -17,8 +25,54 @@ type Props = {
 };
 
 export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectCard, onDiscard, onKnock }: Props) {
-  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, markedCards, statusMessage, lastDrawnId, lastDiscardBy } = state;
+  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, markedCards, statusMessage, lastDrawnId, lastDiscardBy, drewFromDiscard } = state;
   const [sortMode, setSortMode] = useState<"suit" | "rank">("suit");
+
+  // Flying-card animation (deck -> hand, hand -> discard pile).
+  const stockRef = useRef<HTMLButtonElement>(null);
+  const discardRef = useRef<HTMLButtonElement>(null);
+  const handRef = useRef<HTMLDivElement>(null);
+  const cpuRef = useRef<HTMLDivElement>(null);
+  const [flight, setFlight] = useState<Flight | null>(null);
+  const flightKey = useRef(0);
+  const prevDrawn = useRef<string | null>(null);
+  const prevDiscardTop = useRef<string | null>(null);
+  const clearFlight = useCallback(() => setFlight(null), []);
+
+  const startFlight = useCallback((card: Card, fromEl: Element | null, toEl: Element | null) => {
+    const from = centerOf(fromEl);
+    const to = centerOf(toEl);
+    if (!from || !to || !toEl) return;
+    const r = (toEl as HTMLElement).getBoundingClientRect();
+    setFlight({ key: ++flightKey.current, card, from, to, w: r.width, h: r.height });
+  }, []);
+
+  // Draw: a card flies from the deck (or discard pile) into your hand.
+  useEffect(() => {
+    if (!lastDrawnId || lastDrawnId === prevDrawn.current) return;
+    prevDrawn.current = lastDrawnId;
+    playDraw();
+    const card = playerHand.find(c => c.id === lastDrawnId);
+    if (!card) return;
+    const fromEl = drewFromDiscard ? discardRef.current : stockRef.current;
+    const raf = requestAnimationFrame(() => {
+      const toEl = document.querySelector(`[data-card-id="${lastDrawnId}"]`);
+      startFlight(card, fromEl, toEl);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [lastDrawnId, playerHand, drewFromDiscard, startFlight]);
+
+  // Discard: the placed card flies from the hand (you) or CPU area onto the pile.
+  useEffect(() => {
+    const top = discardPile[discardPile.length - 1];
+    if (!top || !lastDiscardBy || top.id === prevDiscardTop.current) return;
+    prevDiscardTop.current = top.id;
+    playDiscard();
+    const fromEl = lastDiscardBy === "cpu" ? cpuRef.current : handRef.current;
+    startFlight(top, fromEl, discardRef.current);
+  }, [discardPile, lastDiscardBy, startFlight]);
+
+  const hiddenId = flight?.card?.id ?? null;
 
   // Best arrangement: melds laid out on the table, deadwood kept in hand.
   const best = useMemo(() => bestDeadwood(playerHand), [playerHand]);
@@ -56,7 +110,9 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
       {/* CPU area */}
       <section className="cpu-area" aria-label="CPU hand">
         <div className="area-label">CPU · {cpuHand.length} cards</div>
-        <HandView cards={cpuHand} faceDown fan fanCpu label="CPU hand" />
+        <div ref={cpuRef}>
+          <HandView cards={cpuHand} faceDown fan fanCpu label="CPU hand" />
+        </div>
       </section>
 
       {/* Player melds laid out on the felt */}
@@ -74,6 +130,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
               fan
               meldMap={meldMap}
               drawnId={lastDrawnId}
+              hiddenId={hiddenId}
               label={`Meld ${i + 1}`}
             />
           ))
@@ -85,6 +142,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
         <div className="pile-group">
           <div className="pile-label">Stock</div>
           <button
+            ref={stockRef}
             className="pile-btn"
             disabled={!canDraw}
             onClick={onDrawStock}
@@ -101,13 +159,14 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
         <div className="pile-group">
           <div className="pile-label">Discard</div>
           <button
+            ref={discardRef}
             className="pile-btn"
             disabled={!canDraw || !topDiscard}
             onClick={onDrawDiscard}
             aria-label={topDiscard ? `Draw ${topDiscard.id} from discard` : "Discard pile empty"}
           >
             {topDiscard ? (
-              <CardView key={topDiscard.id} card={topDiscard} placedBy={lastDiscardBy} />
+              <CardView key={topDiscard.id} card={topDiscard} placedBy={lastDiscardBy} hidden={topDiscard.id === hiddenId} />
             ) : (
               <div className="card card-empty">∅</div>
             )}
@@ -133,15 +192,18 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             ⇄ Sort
           </button>
         </div>
-        <HandView
-          cards={deadwoodCards}
-          selectedId={selectedCard}
-          markedIds={markedCards}
-          onSelect={onSelect}
-          fan
-          drawnId={lastDrawnId}
-          label="Your deadwood"
-        />
+        <div ref={handRef}>
+          <HandView
+            cards={deadwoodCards}
+            selectedId={selectedCard}
+            markedIds={markedCards}
+            onSelect={onSelect}
+            fan
+            drawnId={lastDrawnId}
+            hiddenId={hiddenId}
+            label="Your deadwood"
+          />
+        </div>
         {deadwoodCards.length === 0 && <div className="melds-empty">All melded — knock for Gin!</div>}
         {phase === "awaiting-discard" && markedCards.length > 1 && selectedCard && (
           <div className="discard-hint">
@@ -161,6 +223,8 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           </button>
         </div>
       </section>
+
+      {flight && <FlyingCard flight={flight} onDone={clearFlight} />}
     </div>
   );
 }

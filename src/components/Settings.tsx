@@ -4,8 +4,10 @@ import { TARGET_SCORES, DIFFICULTIES } from "../storage";
 type Props = {
   targetScore: number;
   difficulty: Difficulty;
+  soundOn: boolean;
   onTargetChange: (score: number) => void;
   onDifficultyChange: (difficulty: Difficulty) => void;
+  onSoundChange: (on: boolean) => void;
   onResetStats: () => void;
   onBack: () => void;
 };
@@ -25,8 +27,10 @@ const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 export default function Settings({
   targetScore,
   difficulty,
+  soundOn,
   onTargetChange,
   onDifficultyChange,
+  onSoundChange,
   onResetStats,
   onBack,
 }: Props) {
@@ -70,6 +74,26 @@ export default function Settings({
             ))}
           </div>
           <p className="settings-hint">Applies to your next game.</p>
+        </div>
+
+        <div className="settings-group">
+          <div className="settings-label">Sound effects</div>
+          <div className="settings-options">
+            <button
+              className={`btn settings-option${soundOn ? " settings-option-active" : ""}`}
+              onClick={() => onSoundChange(true)}
+              aria-pressed={soundOn}
+            >
+              <span className="settings-option-value settings-option-value-sm">🔊 On</span>
+            </button>
+            <button
+              className={`btn settings-option${!soundOn ? " settings-option-active" : ""}`}
+              onClick={() => onSoundChange(false)}
+              aria-pressed={!soundOn}
+            >
+              <span className="settings-option-value settings-option-value-sm">🔇 Off</span>
+            </button>
+          </div>
         </div>
 
         <div className="settings-group">

@@ -14,11 +14,13 @@ type Props = {
   drawn?: boolean;
   /** Animate this card being placed onto the discard pile, from the given side. */
   placedBy?: "player" | "cpu" | null;
+  /** Hide this card (while a flying clone travels in its place). */
+  hidden?: boolean;
 };
 
 const MELD_COLORS = 4;
 
-export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null }: Props) {
+export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null, hidden = false }: Props) {
   if (faceDown) {
     return (
       <div className={`card card-back${small ? " card-small" : ""}`} aria-label="face-down card" />
@@ -36,7 +38,8 @@ export default function CardView({ card, faceDown = false, selected = false, mar
         : "";
   return (
     <div
-      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}`}
+      data-card-id={card.id}
+      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}${hidden ? " card-hidden" : ""}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}

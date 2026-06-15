@@ -9,6 +9,7 @@ import type { Difficulty } from "./game/types";
 export type Settings = {
   targetScore: number;
   difficulty: Difficulty;
+  soundOn: boolean;
 };
 
 export type Stats = {
@@ -24,7 +25,7 @@ export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const SETTINGS_KEY = "gin-rummy-settings";
 const STATS_KEY = "gin-rummy-stats";
 
-const DEFAULT_SETTINGS: Settings = { targetScore: 100, difficulty: "medium" };
+const DEFAULT_SETTINGS: Settings = { targetScore: 100, difficulty: "medium", soundOn: true };
 const DEFAULT_STATS: Stats = { wins: 0, losses: 0, gamesPlayed: 0, totalPoints: 0 };
 
 export function loadSettings(): Settings {
@@ -42,6 +43,7 @@ export function loadSettings(): Settings {
           difficulty && DIFFICULTIES.includes(difficulty)
             ? difficulty
             : DEFAULT_SETTINGS.difficulty,
+        soundOn: typeof parsed.soundOn === "boolean" ? parsed.soundOn : DEFAULT_SETTINGS.soundOn,
       };
     }
   } catch {
