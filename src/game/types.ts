@@ -39,6 +39,8 @@ export type GameState = {
   statusMessage: string;
   roundResult: RoundResult | null;
   drewFromDiscard: boolean;
+  lastDrawnId: string | null;             // card just drawn into the player's hand (draw animation)
+  lastDiscardBy: "player" | "cpu" | null; // who placed the current top discard (place animation)
   targetScore: number;        // points needed to win the game
   gameId: number;             // unique per game, used to record stats once
   cpuDifficulty: Difficulty;  // CPU skill level for this game

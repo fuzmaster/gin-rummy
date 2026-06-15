@@ -10,11 +10,15 @@ type Props = {
   small?: boolean;
   /** Index of the meld this card belongs to, or undefined if it's deadwood. */
   meldGroup?: number;
+  /** Animate this card flying into the hand (just drawn). */
+  drawn?: boolean;
+  /** Animate this card being placed onto the discard pile, from the given side. */
+  placedBy?: "player" | "cpu" | null;
 };
 
 const MELD_COLORS = 4;
 
-export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup }: Props) {
+export default function CardView({ card, faceDown = false, selected = false, marked = false, onClick, small = false, meldGroup, drawn = false, placedBy = null }: Props) {
   if (faceDown) {
     return (
       <div className={`card card-back${small ? " card-small" : ""}`} aria-label="face-down card" />
@@ -23,9 +27,16 @@ export default function CardView({ card, faceDown = false, selected = false, mar
 
   const meldClass = meldGroup !== undefined ? ` card-meld card-meld-${meldGroup % MELD_COLORS}` : "";
   const markedClass = marked && !selected ? " card-marked" : "";
+  const animClass = drawn
+    ? " card-drawn"
+    : placedBy === "player"
+      ? " card-place-player"
+      : placedBy === "cpu"
+        ? " card-place-cpu"
+        : "";
   return (
     <div
-      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}`}
+      className={`card${selected ? " card-selected" : ""}${markedClass}${small ? " card-small" : ""}${meldClass}${animClass}`}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}

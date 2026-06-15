@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectCard, onDiscard, onKnock }: Props) {
-  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, markedCards, statusMessage } = state;
+  const { phase, stock, discardPile, playerHand, cpuHand, selectedCard, markedCards, statusMessage, lastDrawnId, lastDiscardBy } = state;
   const [sortMode, setSortMode] = useState<"suit" | "rank">("suit");
 
   // Best arrangement: melds laid out on the table, deadwood kept in hand.
@@ -73,6 +73,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
               onSelect={onSelect}
               fan
               meldMap={meldMap}
+              drawnId={lastDrawnId}
               label={`Meld ${i + 1}`}
             />
           ))
@@ -106,7 +107,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
             aria-label={topDiscard ? `Draw ${topDiscard.id} from discard` : "Discard pile empty"}
           >
             {topDiscard ? (
-              <CardView card={topDiscard} />
+              <CardView key={topDiscard.id} card={topDiscard} placedBy={lastDiscardBy} />
             ) : (
               <div className="card card-empty">∅</div>
             )}
@@ -138,6 +139,7 @@ export default function GameTable({ state, onDrawStock, onDrawDiscard, onSelectC
           markedIds={markedCards}
           onSelect={onSelect}
           fan
+          drawnId={lastDrawnId}
           label="Your deadwood"
         />
         {deadwoodCards.length === 0 && <div className="melds-empty">All melded — knock for Gin!</div>}

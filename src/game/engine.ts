@@ -54,6 +54,8 @@ export function createInitialState(
     statusMessage: "",
     roundResult: null,
     drewFromDiscard: false,
+    lastDrawnId: null,
+    lastDiscardBy: null,
     targetScore,
     gameId: ++gameCounter,
     cpuDifficulty,
@@ -77,6 +79,8 @@ export function newRound(state: GameState): GameState {
     markedCards: [],
     roundResult: null,
     drewFromDiscard: false,
+    lastDrawnId: null,
+    lastDiscardBy: null,
     round: state.round + 1,
     statusMessage: "Your turn — draw a card.",
   };
@@ -97,6 +101,7 @@ export function playerDrawStock(state: GameState): GameState {
     selectedCard: null,
     markedCards: [],
     drewFromDiscard: false,
+    lastDrawnId: drawn.id,
     statusMessage: `You drew ${drawn.id} from stock. Select a card to discard.`,
   };
 }
@@ -114,6 +119,8 @@ export function playerDrawDiscard(state: GameState): GameState {
     selectedCard: null,
     markedCards: [],
     drewFromDiscard: true,
+    lastDrawnId: drawn.id,
+    lastDiscardBy: null, // the newly revealed discard top wasn't "placed"
     statusMessage: `You drew ${drawn.id} from discard. Select a card to discard.`,
   };
 }
@@ -154,6 +161,8 @@ export function playerDiscard(state: GameState): GameState {
     markedCards: [],
     phase: "cpu-turn",
     drewFromDiscard: false,
+    lastDrawnId: null,
+    lastDiscardBy: "player",
     statusMessage: `You discarded ${card.id}. CPU is thinking…`,
   };
 }
@@ -177,6 +186,8 @@ export function playerKnock(state: GameState): GameState {
     discardPile: [...state.discardPile, card],
     selectedCard: null,
     markedCards: [],
+    lastDrawnId: null,
+    lastDiscardBy: "player",
     phase,
     playerScore: newPlayerScore,
     cpuScore: newCpuScore,
@@ -212,6 +223,8 @@ export function runCpuTurn(state: GameState): GameState {
       playerScore: newPlayerScore,
       cpuScore: newCpuScore,
       roundResult: result,
+      lastDrawnId: null,
+      lastDiscardBy: "cpu",
       statusMessage: `CPU drew from ${drewMsg}, discarded ${discardedCard.id}, and knocked!`,
     };
   }
@@ -222,6 +235,8 @@ export function runCpuTurn(state: GameState): GameState {
     stock: newStock,
     discardPile: newDiscardPile,
     phase: "awaiting-draw",
+    lastDrawnId: null,
+    lastDiscardBy: "cpu",
     statusMessage: `CPU drew from ${drewMsg} and discarded ${discardedCard.id}. Your turn — draw a card.`,
   };
 }

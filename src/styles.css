@@ -918,6 +918,38 @@ body {
   animation: none;
 }
 
+/* A freshly drawn card swoops down from the table into your hand. */
+@keyframes draw-in {
+  0%   { opacity: 0; transform: translateY(-46px) scale(0.6) rotate(-7deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+.hand-fan .card.card-drawn {
+  animation: draw-in 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  z-index: 6;
+}
+
+/* A card flies onto the discard pile from the player (below) or CPU (above). */
+@keyframes place-from-bottom {
+  0%   { opacity: 0; transform: translateY(80px) scale(0.8) rotate(5deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes place-from-top {
+  0%   { opacity: 0; transform: translateY(-80px) scale(0.8) rotate(-5deg); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+.center-area .card.card-place-player {
+  animation: place-from-bottom 0.36s cubic-bezier(0.2, 0.7, 0.3, 1.05) both;
+}
+
+.center-area .card.card-place-cpu {
+  animation: place-from-top 0.36s cubic-bezier(0.2, 0.7, 0.3, 1.05) both;
+}
+
 .menu-card {
   animation: menu-rise 0.25s ease both;
 }
