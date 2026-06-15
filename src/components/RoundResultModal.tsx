@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import type { Card, RoundResult } from "../game/types";
 import { meldGroups } from "../game/melds";
 import HandView from "./HandView";
+
+// Auto-advance a finished round so the loop never stalls on a tap.
+const AUTO_NEXT_MS = 2200;
 
 type Props = {
   result: RoundResult;
@@ -23,6 +27,13 @@ export default function RoundResultModal({ result, cpuHand, playerScore, cpuScor
   const winnerLabel =
     result.winner === "player" ? "You win" : result.winner === "cpu" ? "CPU wins" : "No winner";
   const cpuMelds = meldGroups(cpuHand);
+
+  // Between rounds, advance automatically; on game over, let the player choose.
+  useEffect(() => {
+    if (isGameOver) return;
+    const timer = setTimeout(onNext, AUTO_NEXT_MS);
+    return () => clearTimeout(timer);
+  }, [isGameOver, onNext]);
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Round result">
       <div className="modal">
@@ -66,13 +77,13 @@ export default function RoundResultModal({ result, cpuHand, playerScore, cpuScor
 
         {isGameOver ? (
           <p className="modal-gameover">
-            {playerScore >= 100 ? "🎉 You reached 100 — you win the game!" : "CPU reached 100 — better luck next time!"}
+            {playerScore > cpuScore ? "🎉 You win the game!" : "The CPU wins the game — better luck next time!"}
           </p>
         ) : null}
 
         <div className="modal-actions">
-          <button className="btn btn-primary modal-btn" onClick={onNext}>
-            {isGameOver ? "Play Again" : "Next Round"}
+          <button className="btn btn-primary modal-btn next-pulse" onClick={onNext}>
+            {isGameOver ? "Play Again" : "Next Round ▸"}
           </button>
           {isGameOver && (
             <button className="btn modal-btn" onClick={onMenu}>

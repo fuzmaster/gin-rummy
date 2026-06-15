@@ -25,7 +25,8 @@ export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const SETTINGS_KEY = "gin-rummy-settings";
 const STATS_KEY = "gin-rummy-stats";
 
-const DEFAULT_SETTINGS: Settings = { targetScore: 100, difficulty: "medium", soundOn: true };
+// Default to the short "Quick Game" (50) — faster sessions for new players.
+const DEFAULT_SETTINGS: Settings = { targetScore: 50, difficulty: "medium", soundOn: true };
 const DEFAULT_STATS: Stats = { wins: 0, losses: 0, gamesPlayed: 0, totalPoints: 0 };
 
 export function loadSettings(): Settings {
